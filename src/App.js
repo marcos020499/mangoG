@@ -1,11 +1,15 @@
 import React, { useState, useEffect } from 'react';
 import { CssBaseline } from '@material-ui/core';
-import { BrowserRouter as Router, Switch, Route } from 'react-router-dom';
+import { BrowserRouter as Router, Switch, Route, Redirect  } from 'react-router-dom';
+import { createStructuredSelector } from "reselect";
+import { connect } from "react-redux";
 
 import { Navbar, Products, Cart, Checkout } from './components';
 import { commerce } from './lib/commerce';
+import { selectCurrentUser } from "./redux/user/user.selector";
+import Signin from "./pages/sign-in-sign-up/sign-in-sign-up";
 
-const App = () => {
+const App = ({ currentUser }) => {
   const [mobileOpen, setMobileOpen] = React.useState(false);
   const [products, setProducts] = useState([]);
   const [cart, setCart] = useState({});
@@ -83,6 +87,10 @@ const App = () => {
           <Route exact path="/cart">
             <Cart cart={cart} onUpdateCartQty={handleUpdateCartQty} onRemoveFromCart={handleRemoveFromCart} onEmptyCart={handleEmptyCart} />
           </Route>
+          <Route
+            exact path="/signin"
+            render={() => (currentUser ? <Redirect to="/" /> : <Signin />)}
+          />
           <Route path="/checkout" exact>
             <Checkout cart={cart} order={order} onCaptureCheckout={handleCaptureCheckout} error={errorMessage} />
           </Route>
@@ -92,4 +100,9 @@ const App = () => {
   );
 };
 
-export default App;
+const mapStateToProps = createStructuredSelector({
+  currentUser: selectCurrentUser,
+});
+
+
+export default connect(mapStateToProps, null)(App);
